@@ -1,0 +1,6 @@
+{
+  "name": "Undangan Pernikahan Digital Modern",
+  "description": "Website undangan pernikahan digital mewah, elegan, dan responsif dengan musik latar, countdown, galeri lightbox, amplop digital, dan personalisasi nama tamu via URL.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Pengelola Undangan Pernikahan</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Great+Vibes&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./style.css">
+  
+  <style>
+    /* Admin Standalone Page Layout Enhancements */
+    body.admin-body-page {
+      background: #0F0D0A;
+      color: #F8F6F0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .admin-navbar {
+      background: rgba(28, 25, 23, 0.95);
+      border-bottom: 1px solid var(--gold-primary);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+    }
+
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .admin-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .admin-page-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.25rem 3rem 1.25rem;
+      flex: 1;
+    }
+
+    /* Login Overlay for Standalone Page */
+    #admin-login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(15, 13, 10, 0.96);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      transition: var(--transition-smooth);
+    }
+
+    #admin-login-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .admin-auth-card {
+      max-width: 440px;
+      width: 100%;
+      background: #1C1917;
+      border: 1px solid var(--gold-primary);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    .admin-auth-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(197, 160, 89, 0.15);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem auto;
+    }
+
+    /* CRUD Item Card */
+    .crud-card {
+      background: rgba(41, 37, 36, 0.6);
+      border: 1px solid rgba(197, 160, 89, 0.25);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: var(--transition-smooth);
+    }
+
+    .crud-card:hover {
+      border-color: var(--gold-primary);
+      background: rgba(41, 37, 36, 0.9);
+    }
+
+    .crud-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge-gold {
+      background: rgba(197, 160, 89, 0.2);
+      color: var(--gold-light);
+      border: 1px solid var(--gold-primary);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm-danger {
+      background: rgba(220, 38, 38, 0.2);
+      color: #FCA5A5;
+      border: 1px solid rgba(220, 38, 38, 0.5);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-sm-danger:hover {
+      background: rgba(220, 38, 38, 0.8);
+      color: #FFF;
+    }
+
+    .btn-sm-edit {
+      background: rgba(197, 160, 89, 0.2);
+      color: var(--gold-light);
+      border: 1px solid var(--gold-primary);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-sm-edit:hover {
+      background: var(--gold-gradient);
+      color: #FFF;
+    }
+
+    /* Modal Edit CRUD */
+    .admin-crud-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10005;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition-smooth);
+    }
+
+    .admin-crud-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .admin-crud-card {
+      max-width: 600px;
+      width: 100%;
+      background: #1C1917;
+      border: 1px solid var(--gold-primary);
+      border-radius: 20px;
+      padding: 1.75rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body class="admin-body-page">
+
+  <!-- AUTHENTICATION OVERLAY -->
+  <div id="admin-login-overlay">
+    <div class="admin-auth-card">
+      <div class="admin-auth-icon">
+        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+
+      <h2 class="font-serif" style="font-size: 1.75rem; color: var(--gold-light); margin-bottom: 0.5rem;">
+        Area Pengelola Undangan
+      </h2>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        Masukkan PIN Keamanan untuk membuka Dashboard Admin khusus pemilik undangan (Default PIN: <strong>1234</strong>).
+      </p>
+
+      <form id="form-admin-auth">
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <input type="password" id="auth-pin-input" class="form-control" placeholder="••••" maxlength="8" required style="font-size: 1.5rem; letter-spacing: 8px; text-align: center; background: #292524; color: var(--gold-light); border-color: var(--gold-primary);">
+        </div>
+
+        <button type="submit" class="btn-gold" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+          🔓 Masuk Dashboard Admin
+        </button>
+      </form>
+
+      <div style="margin-top: 1.5rem;">
+        <a href="index.html" style="font-size: 0.82rem; color: var(--text-muted); text-decoration: none;">
+          ← Kembali ke Halaman Undangan Publik
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN NAVBAR HEADER -->
+  <header class="admin-navbar">
+    <div class="admin-brand">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      Dashboard Admin Undangan
+    </div>
+
+    <div class="admin-nav-actions">
+      <a href="index.html" target="_blank" class="btn-outline-gold" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; text-decoration: none;">
+        <span>👁️ Lihat Undangan Publik</span>
+      </a>
+      <button id="btn-admin-logout" class="btn-sm-danger" style="padding: 0.55rem 1rem; font-size: 0.85rem;">
+        🔒 Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN ADMIN DASHBOARD CONTAINER -->
+  <main class="admin-page-container">
+    
+    <div class="admin-modal-card" style="max-width: 100%; border-radius: 20px;">
+      
+      <!-- Navigation Tabs -->
+      <div class="admin-tabs" style="background: #292524; overflow-x: auto;">
+        <button class="admin-tab-btn active" data-tab="tab-text">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          Tulisan & Mempelai
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-event">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Kelola Acara (CRUD)
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-photos">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Foto & Galeri
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-music">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zm12 0c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+          Lagu & Musik
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-bank">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Amplop Rekening (CRUD)
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-story">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          Kisah Cinta (CRUD)
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-wishes">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+          Buku Tamu & Doa (CRUD)
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-links">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          Generator Link Tamu
+        </button>
+        <button class="admin-tab-btn" data-tab="tab-pin">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          PIN Keamanan
+        </button>
+      </div>
+
+      <!-- Admin Tab Contents -->
+      <div class="admin-body">
+        <form id="form-admin-dashboard">
+
+          <!-- TAB 1: TULISAN & MEMPELAI -->
+          <div id="tab-text" class="admin-tab-pane active">
+            <div class="admin-section-label">Informasi Pasangan Mempelai</div>
+            
+            <div class="admin-form-grid">
+              <div class="form-group">
+                <label class="form-label" for="adm-cover-title">Judul Pasangan (Cover)</label>
+                <input type="text" id="adm-cover-title" class="form-control" placeholder="Contoh: Rhesa & Alya">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="adm-cover-date-text">Teks Tanggal Utama</label>
+                <input type="text" id="adm-cover-date-text" class="form-control" placeholder="Contoh: SABTU, 24 OKTOBER 2026">
+              </div>
+            </div>
+
+            <div class="admin-form-grid">
+              <div class="form-group">
+                <label class="form-label" for="adm-groom-name">Nama Lengkap Mempelai Pria</label>
+                <input type="text" id="adm-groom-name" class="form-control" placeholder="Nama Pria...">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="adm-groom-parents">Orang Tua Pria</label>
+                <input type="text" id="adm-groom-parents" class="form-control" placeholder="Bapak ... & Ibu ...">
+              </div>
+            </div>
+
+            <div class="admin-form-grid">
+              <div class="form-group">
+                <label class="form-label" for="adm-bride-name">Nama Lengkap Mempelai Wanita</label>
+                <input type="text" id="adm-bride-name" class="form-control" placeholder="Nama Wanita...">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="adm-bride-parents">Orang Tua Wanita</label>
+                <input type="text" id="adm-bride-parents" class="form-control" placeholder="Bapak ... & Ibu ...">
+              </div>
+            </div>
+
+            <div class="admin-section-label" style="margin-top: 1.5rem;">Kutipan Ayat Pernikahan</div>
+            <div class="form-group">
+              <label class="form-label" for="adm-quote-text">Isi Kutipan Ayat / Doa</label>
+              <textarea id="adm-quote-text" class="form-control" rows="3" placeholder="Isi kutipan ayat..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="adm-quote-source">Sumber Kutipan</label>
+              <input type="text" id="adm-quote-source" class="form-control" placeholder="Contoh: (Q.S. Ar-Rum: 21)">
+            </div>
+          </div>
+
+          <!-- TAB 2: KELOLA ACARA (CRUD) -->
+          <div id="tab-event" class="admin-tab-pane">
+            <div class="admin-section-label">Target Countdown Timer</div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label" for="adm-target-countdown">Waktu Hitung Mundur Utama (ISO Format)</label>
+              <input type="datetime-local" id="adm-target-countdown" class="form-control">
+            </div>
+
+            <div class="admin-section-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <span>Daftar Rangkaian Acara Pernikahan</span>
+              <button type="button" id="btn-add-event-modal" class="btn-gold" style="padding: 6px 14px; font-size: 0.82rem;">
+                + Tambah Acara Baru
+              </button>
+            </div>
+
+            <div id="admin-events-list">
+              <!-- Render Event Cards via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 3: FOTO & GALERI -->
+          <div id="tab-photos" class="admin-tab-pane">
+            <div class="admin-section-label">Foto Utama & Mempelai</div>
+            
+            <div class="admin-form-grid">
+              <!-- Cover Image -->
+              <div class="form-group">
+                <label class="form-label">Foto Background Cover</label>
+                <div class="image-picker-box">
+                  <img id="prev-cover-bg" class="image-preview-thumb" src="assets/images/cover.jpg" alt="Cover">
+                  <div style="flex:1;">
+                    <input type="text" id="adm-cover-bg-url" class="form-control" placeholder="URL Foto Cover...">
+                    <label class="btn-outline-gold btn-upload-file" style="display:inline-block; margin-top: 6px; padding: 4px 10px; font-size: 0.78rem;">
+                      📁 Upload File Foto
+                      <input type="file" id="file-cover-bg" accept="image/*">
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Groom Image -->
+              <div class="form-group">
+                <label class="form-label">Foto Mempelai Pria</label>
+                <div class="image-picker-box">
+                  <img id="prev-groom-img" class="image-preview-thumb" src="assets/images/groom.jpg" alt="Groom">
+                  <div style="flex:1;">
+                    <input type="text" id="adm-groom-img-url" class="form-control" placeholder="URL Foto Pria...">
+                    <label class="btn-outline-gold btn-upload-file" style="display:inline-block; margin-top: 6px; padding: 4px 10px; font-size: 0.78rem;">
+                      📁 Upload File Foto
+                      <input type="file" id="file-groom-img" accept="image/*">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-form-grid">
+              <!-- Bride Image -->
+              <div class="form-group">
+                <label class="form-label">Foto Mempelai Wanita</label>
+                <div class="image-picker-box">
+                  <img id="prev-bride-img" class="image-preview-thumb" src="assets/images/bride.jpg" alt="Bride">
+                  <div style="flex:1;">
+                    <input type="text" id="adm-bride-img-url" class="form-control" placeholder="URL Foto Wanita...">
+                    <label class="btn-outline-gold btn-upload-file" style="display:inline-block; margin-top: 6px; padding: 4px 10px; font-size: 0.78rem;">
+                      📁 Upload File Foto
+                      <input type="file" id="file-bride-img" accept="image/*">
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Couple Hero Image -->
+              <div class="form-group">
+                <label class="form-label">Foto Utama Pasangan (Hero)</label>
+                <div class="image-picker-box">
+                  <img id="prev-couple-img" class="image-preview-thumb" src="assets/images/couple.jpg" alt="Couple">
+                  <div style="flex:1;">
+                    <input type="text" id="adm-couple-img-url" class="form-control" placeholder="URL Foto Pasangan...">
+                    <label class="btn-outline-gold btn-upload-file" style="display:inline-block; margin-top: 6px; padding: 4px 10px; font-size: 0.78rem;">
+                      📁 Upload File Foto
+                      <input type="file" id="file-couple-img" accept="image/*">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Galeri Manager -->
+            <div class="admin-section-label" style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+              <span>Galeri Foto Momen Bahagia</span>
+              <label class="btn-gold btn-upload-file" style="padding: 6px 14px; font-size: 0.82rem;">
+                + Upload Foto
+                <input type="file" id="file-add-gallery" accept="image/*" multiple>
+              </label>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <div style="display: flex; gap: 8px;">
+                <input type="url" id="adm-add-gallery-url" class="form-control" placeholder="Atau tempel URL foto online di sini...">
+                <button type="button" id="btn-add-gallery-url" class="btn-outline-gold" style="white-space:nowrap;">
+                  Tambah URL
+                </button>
+              </div>
+            </div>
+
+            <div id="adm-gallery-container" class="admin-gallery-list">
+              <!-- Gallery Thumbnails injected via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 4: LAGU & MUSIK -->
+          <div id="tab-music" class="admin-tab-pane">
+            <div class="admin-section-label">Pengaturan Musik Latar Undangan</div>
+
+            <div class="form-group">
+              <label class="form-label" for="adm-music-url">URL File Musik / MP3</label>
+              <input type="url" id="adm-music-url" class="form-control" placeholder="https://domain.com/lagu-pernikahan.mp3">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+              <label class="btn-outline-gold btn-upload-file" style="padding: 6px 14px; font-size: 0.85rem;">
+                📁 Upload File MP3 / Audio
+                <input type="file" id="file-music-audio" accept="audio/*">
+              </label>
+              <button type="button" id="btn-test-admin-music" class="btn-gold" style="padding: 6px 14px; font-size: 0.85rem;">
+                ▶️ Tes Putar Musik
+              </button>
+            </div>
+
+            <div class="admin-section-label">Pilihan Preset Lagu Romantis</div>
+            <div class="preset-music-list">
+              <div class="preset-music-item" data-music-preset="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-acoustic-guitar-113264.mp3">
+                <div>
+                  <div class="preset-music-name">🎸 Romantic Acoustic Guitar</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Alunan gitar akustik lembut dan hangat</div>
+                </div>
+                <span class="btn-outline-gold" style="padding: 4px 10px; font-size: 0.75rem;">Gunakan</span>
+              </div>
+
+              <div class="preset-music-item" data-music-preset="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c87f9e80.mp3?filename=wedding-piano-10339.mp3">
+                <div>
+                  <div class="preset-music-name">🎹 Wedding Piano Romance</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Melodi piano elegan bernuansa mewah</div>
+                </div>
+                <span class="btn-outline-gold" style="padding: 4px 10px; font-size: 0.75rem;">Gunakan</span>
+              </div>
+
+              <div class="preset-music-item" data-music-preset="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=sweet-love-acoustic-18349.mp3">
+                <div>
+                  <div class="preset-music-name">🎻 Sweet Love Strings</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Alunan string & biola romantis</div>
+                </div>
+                <span class="btn-outline-gold" style="padding: 4px 10px; font-size: 0.75rem;">Gunakan</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: AMPLOP REKENING (CRUD) -->
+          <div id="tab-bank" class="admin-tab-pane">
+            <div class="admin-section-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <span>Daftar Rekening & E-Wallet Amplop Digital</span>
+              <button type="button" id="btn-add-bank-modal" class="btn-gold" style="padding: 6px 14px; font-size: 0.82rem;">
+                + Tambah Rekening Baru
+              </button>
+            </div>
+
+            <div id="admin-bank-list">
+              <!-- Render Bank Cards via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 6: KISAH CINTA (CRUD) -->
+          <div id="tab-story" class="admin-tab-pane">
+            <div class="admin-section-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <span>Timeline Momen Kisah Cinta</span>
+              <button type="button" id="btn-add-story-modal" class="btn-gold" style="padding: 6px 14px; font-size: 0.82rem;">
+                + Tambah Momen Baru
+              </button>
+            </div>
+
+            <div id="admin-story-list">
+              <!-- Render Story Cards via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 7: BUKU TAMU & DOA (CRUD) -->
+          <div id="tab-wishes" class="admin-tab-pane">
+            <div class="admin-section-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <span>Kelola Pesan Ucapan & Doa Tamu</span>
+              <button type="button" id="btn-add-wish-modal" class="btn-gold" style="padding: 6px 14px; font-size: 0.82rem;">
+                + Tambah Ucapan Manual
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+              <input type="text" id="search-wish-input" class="form-control" placeholder="Cari nama tamu atau isi ucapan...">
+              <select id="filter-wish-attendance" class="form-control" style="max-width: 180px;">
+                <option value="ALL">Semua Kehadiran</option>
+                <option value="Hadir">Hadir</option>
+                <option value="Ragu-ragu">Ragu-ragu</option>
+                <option value="Tidak Hadir">Tidak Hadir</option>
+              </select>
+            </div>
+
+            <div id="admin-wishes-list">
+              <!-- Render Wishes Cards via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 8: GENERATOR LINK TAMU -->
+          <div id="tab-links" class="admin-tab-pane">
+            <div class="admin-section-label">Generator Link Undangan Khusus Tamu</div>
+            
+            <div class="card-glass" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+              <div class="form-group">
+                <label class="form-label" for="gen-guest-name">Nama Tamu yang Diundang</label>
+                <input type="text" id="gen-guest-name" class="form-control" placeholder="Contoh: Rhesa Firmansyah atau Bpk. Ahmad & Keluarga" value="Rhesa Firmansyah">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="gen-guest-url-res">Link URL Hasil Personalisasi</label>
+                <input type="text" id="gen-guest-url-res" class="form-control" readonly style="background: #292524; color: var(--gold-light);">
+              </div>
+
+              <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                <button type="button" id="btn-gen-copy-link" class="btn-gold" style="flex:1;">
+                  📋 Salin Link Undangan
+                </button>
+                <button type="button" id="btn-gen-test-link" class="btn-outline-gold">
+                  👁️ Uji Coba Buka
+                </button>
+                <button type="button" id="btn-gen-save-history" class="btn-outline-gold">
+                  💾 Simpan ke Daftar
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-section-label">Riwayat Link Tamu yang Dibuat</div>
+            <div id="admin-guest-history-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- TAB 9: PIN KEAMANAN -->
+          <div id="tab-pin" class="admin-tab-pane">
+            <div class="admin-section-label">Ubah PIN Keamanan Admin</div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Ubah PIN untuk mencegah orang lain mengubah data undangan Anda tanpa izin.
+            </p>
+            <div class="form-group" style="max-width: 320px;">
+              <label class="form-label" for="adm-new-pin">PIN Admin Baru</label>
+              <input type="password" id="adm-new-pin" class="form-control" placeholder="Masukkan 4 digit PIN baru..." maxlength="8" style="font-size: 1.2rem; letter-spacing: 4px;">
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Admin Actions Footer -->
+      <div class="admin-footer">
+        <button type="button" id="btn-reset-admin" class="btn-outline-gold" style="color: #FCA5A5; border-color: rgba(220,38,38,0.5);">
+          🔄 Reset Default Config
+        </button>
+        
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="btn-save-admin" class="btn-gold" style="padding: 0.75rem 1.75rem; font-size: 1rem;">
+            💾 Simpan Semua Perubahan
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL CRUD DYNAMIC (UNTUK TAMBAH/EDIT ACARA, REKENING, STORY, UCAPAN) -->
+  <div id="modal-crud-dynamic" class="admin-crud-modal">
+    <div class="admin-crud-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 id="crud-modal-title" class="font-serif" style="font-size: 1.35rem; color: var(--gold-light);">
+          Form Data
+        </h3>
+        <button id="btn-close-crud-modal" style="background:none; border:none; color:#FFF; cursor:pointer;">
+          ✕
+        </button>
+      </div>
+
+      <form id="form-crud-dynamic">
+        <div id="crud-modal-fields">
+          <!-- Dynamic Input Fields injected via JS -->
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem;">
+          <button type="button" id="btn-cancel-crud" class="btn-outline-gold">Batal</button>
+          <button type="submit" class="btn-gold">Simpan Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- Admin JavaScript Logic -->
+  <script src="./admin.js"></script>
+</body>
+</html>
